@@ -19,6 +19,9 @@
 	$app->add('/', 'Home');
 	$app->add('/role', '\Admin\CRUD');
 	$app->add('/bread', '\Admin\BREAD');
-	$app->add('/bread/generate/:table', '\Admin\BREAD', 'generate');
+	$app->add('/bread/generate', '\Admin\BREAD', 'generate', 'post');
+	$app->add('/bread/generate/:table', '\Admin\BREAD', 'detail');
+	$app->add('/bread/delete/:table', '\Admin\BREAD', 'delete');
+
 
 	$app->run('/');

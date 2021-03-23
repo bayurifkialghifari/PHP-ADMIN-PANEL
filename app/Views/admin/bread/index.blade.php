@@ -66,14 +66,32 @@
 									</thead>
 									<tbody>
 										@foreach($records as $q)
-											<tr data-id="{{$q['Tables_in_admin_panel']}}">
-												<td>{{ ucwords(str_replace('_', ' ', $q['Tables_in_admin_panel'])) }}</td>
-												<td>
-													<a href="{{ base_url }}bread/generate/{{$q['Tables_in_admin_panel']}}" class="btn btn-primary btn-sm">
-														<i class="fa fa-edit"></i> Generate BREAD
-													</a>
-												</td>
-											</tr>
+											@php
+												
+												$field = $q['Tables_in_'.db_name]
+
+											@endphp
+
+											@if($field != 'bread' && $field != 'bread_field')
+												<tr data-id="{{$field}}">
+													<td>{{ ucwords(str_replace('_', ' ', $field)) }}</td>
+													<td>
+														<a href="{{ base_url }}bread/generate/{{$field}}" class="btn btn-primary btn-sm">
+															<i class="fa fa-edit"></i> Generate BREAD
+														</a>
+														@foreach($bread_exist as $be)
+															@if($be['table_name'] == $field)
+																<a href="{{ base_url }}bread/generate/{{$field}}" class="btn btn-default btn-sm">
+																	<i class="fa fa-edit"></i> VIEW BREAD
+																</a>
+																<a href="{{ base_url }}bread/delete/{{$field}}" class="btn btn-danger btn-sm">
+																	<i class="fa fa-times"></i> DELETE BREAD
+																</a>
+															@endif
+														@endforeach
+													</td>
+												</tr>
+											@endif
 										@endforeach
 									</tbody>
 								</table>	
