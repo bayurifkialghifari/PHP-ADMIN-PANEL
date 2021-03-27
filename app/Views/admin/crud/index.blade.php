@@ -66,9 +66,9 @@
 								<table id="dt_basic" class="table table-striped table-bordered table-hover" width="100%">
 									<thead>			                
 										<tr>
-											@foreach($bread as $br)
-												<th {{ $br['orderr'] == 1 ? 'data-class="expand"' : 'data-hide="phone"' }} >
-													{{ $br['display'] }}
+											@foreach($bread_field as $br)
+												<th {{ $br['orderr'] == 1 ? 'data-class=expand' : 'data-hide=phone' }} >
+													{{ $br['display_name'] }}
 												</th>
 											@endforeach
 											<th data-hide="phone">Action</th>
@@ -85,34 +85,27 @@
 													array_push($keys, $keyss);
 												}
 											@endphp
-											<tr data-id="{{$q['id']}}">
-
-												@foreach($bread as $brd)
-													
+											<tr data-id="{{$q[$keys[0]]}}">
+												@foreach($bread_field as $brd)
 													@foreach($keys as $key)
-														
 														@if($key == $brd['field'] && $brd['is_browse'] == 1)
-																	
-															<td>{{$q['name']}}</td>
-														
+															<td>{{$q[$key]}}</td>
 														@endif
-													
 													@endforeach
-												
 												@endforeach
 												<td>
-													<button class="btn btn-primary btn-sm" onclick="Update({
-														@foreach($bread as $brd)
-															@foreach($keys as $key)
-																@if($key == $brd['field'] && $brd['is_edit'] == 1)
-																	{{$key}} : `{{$q['name']}}`,
+													<button class="btn btn-primary btn-sm" onclick="Update({ id: `{{ $q[$keys[0]] }}`,
+														@foreach($bread_field as $brd2)
+															@foreach($keys as $key2)
+																@if($key2 == $brd2['field'] && $brd2['is_edit'] == 1)
+																	{{$key2}} : `{{$q[$key2]}}`,
 																@endif
 															@endforeach
 														@endforeach
 													})">
 														<i class="fa fa-edit"></i> Update
 													</button>
-													<button class="btn btn-danger btn-sm" onclick="Delete({{$q['id']}})">
+													<button class="btn btn-danger btn-sm" onclick="Delete({{$q[$keys[0]]}})">
 														<i class="fa fa-trash"></i> Delete
 													</button>
 												</td>
@@ -168,12 +161,12 @@
 					</div>
 					<div class="modal-body">
 						<input type="hidden" name="id" id="id">
-						@foreach($bread as $brad)
+						@foreach($bread_field as $brad)
 							<div class="row">
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="{{ $brad['field'] }}"> 
-											{{ $brad['display'] }}
+											{{ $brad['display_name'] }}
 										</label>
 
 										@if($brad['type'] != 'description' || $brad['type'] != 'select-option' || $brad['type'] == 'checkbox' || $brad['type'] == 'option')
@@ -182,7 +175,7 @@
 												class="form-control" 
 												id="{{ $brad['field'] }}" 
 												name="{{ $brad['field'] }}"
-												placeholder="{{ $brad['display'] }}" 
+												placeholder="{{ $brad['display_name'] }}" 
 												{{ $brad['is_required'] > 0 ? 'required' : '' }} 
 											/>
 										@elseif($brad['type'] == 'select-option')
@@ -195,7 +188,7 @@
 												class="form-control" 
 												id="{{ $brad['field'] }}"
 												name="{{ $brad['field'] }}"
-												placeholder="{{ $brad['display'] }}" 
+												placeholder="{{ $brad['display_name'] }}" 
 												rows="3" 
 												{{ $brad['is_required'] > 0 ? 'required' : '' }}></textarea>
 										@endif
@@ -229,9 +222,9 @@
 		    	$('#myModal').modal('hide')
 
 		    	let id = $('#id').val()
-		    	let name = $('#name').val()
-		    	let description = $('#description').val()
-		    	let status = $('#status').val()
+		    	@foreach($bread_field as $brdjs)
+		    		let {{ $brdjs['field'] }} = $('#{{ $brdjs['field'] }}').val()
+		    	@endforeach
 
 		    	// Add data function
 		    	if(type == 'ADD')
@@ -242,11 +235,11 @@
 			    	// Execute add data
 		    		$.ajax({
 		    			method: 'post',
-		    			url: '{{ base_url }}admin/setting/level-create',
+		    			url: '{{ base_url }}admin/{{ $slug }}-create',
 		    			data: {
-		    				lev_name: name,
-		    				lev_description: description,
-		    				lev_status: status,
+		    				@foreach($bread_field as $brdjs)
+		    					{{ $brdjs['field'] }} : {{ $brdjs['field'] }},
+		    				@endforeach
 		    			}
 		    		})
 		    		.then(data => JSON.parse(data))
@@ -264,12 +257,12 @@
 			    	// Execute update data
 		    		$.ajax({
 		    			method: 'put',
-		    			url: '{{ base_url }}admin/setting/level-update',
+		    			url: '{{ base_url }}admin/{{ $slug }}-update',
 		    			data: {
-		    				lev_id: id,
-		    				lev_name: name,
-		    				lev_description: description,
-		    				lev_status: status,
+		    				{{ isset($keys[0]) ? $keys[0] : 'id' }}: id,
+		    				@foreach($bread_field as $brdjs)
+		    					{{ $brdjs['field'] }} : {{ $brdjs['field'] }},
+		    				@endforeach
 		    			}
 		    		})
 		    		.then(data => JSON.parse(data))
@@ -296,9 +289,9 @@
 		    	// Execute delete data
 		    	$.ajax({
 	    			method: 'delete',
-	    			url: '{{ base_url }}admin/setting/level-delete',
+	    			url: '{{ base_url }}admin/{{ $slug }}-delete',
 	    			data: {
-	    				lev_id: id
+	    				{{ isset($keys[0]) ? $keys[0] : 'id' }}: id
 	    			}
 	    		})
 	    		.then(data =>
@@ -316,21 +309,21 @@
 
 	    	type = 'ADD'
 	    	$('#id').val('')
-	    	$('#name').val('')
-	    	$('#description').val('')
-	    	$('#status').val('')
+	    	@foreach($bread_field as $brdjs)
+	    		$('#{{ $brdjs['field'] }}').val('')
+	    	@endforeach
 	    	$('#myModalLabel').html('Add Data {{ $title }}')
 	    	$('#myModal').modal('show')
 	    })
 
 		// Update button click
-	    const Update = (id, name, description, status) =>
+	    const Update = (data) =>
 	    {
 	    	type = 'UPDATE'
-	    	$('#id').val(id)
-	    	$('#name').val(name)
-	    	$('#description').val(description)
-	    	$('#status').val(status)
+	    	$('#id').val(data.id)
+	    	@foreach($bread_field as $brdjs)
+	    		$('#{{ $brdjs['field'] }}').val(data.{{ $brdjs['field'] }})
+	    	@endforeach
 		    $('#myModalLabel').html('Update Data {{ $title }}')
 	    	$('#myModal').modal('show')
 	    }

@@ -88,7 +88,7 @@
 			$key 	= array_keys($tabel_id);
 			$key 	= $key[0];
 			$id 	= $tabel_id[$key];
-
+            
 			$query 	= self::connect()->query("DELETE FROM {$table} WHERE {$key}='{$id}'");
 
 			return $query;		
